@@ -3,3 +3,5 @@ Jinja2==2.6
 Werkzeug==0.8.3
 gunicorn==0.17.2
 SQLAlchemy==0.7.10
+Flask-SQLAlchemy==0.16
+WTForms==1.0.4
