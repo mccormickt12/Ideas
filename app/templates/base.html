@@ -42,6 +42,12 @@
               <li><a href="{{url_for('facebook')}}">FaceBook</a></li>
               {% endif %}
 
+              {% if active == "example2" %}
+              <li class="active"><a href="{{url_for('example2')}}">Example</a></li>
+              {% else %}
+              <li ><a href="{{url_for('example2')}}">Example</a></li>
+              {% endif %}
+
               </li>
             </ul>
           </div><!-- /.nav-collapse -->

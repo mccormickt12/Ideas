@@ -12,3 +12,7 @@ def example():
 @app.route('/facebook/')
 def facebook():
 	return render_template('facebook.html', active="facebook")
+
+@app.route('/example2/')
+def example2():
+	return render_template('example.html', active="example2", names=["Samir", "Shanti", "Tom"])
