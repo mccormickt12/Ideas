@@ -5,7 +5,7 @@ def print_all_users():
     users = User.query.all()
     for u in users:
         if u:
-            print u.id, u.name, u.email
+            print u.id, u.name, u.email, u.password
 
 
 def print_all_projects():
