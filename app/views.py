@@ -1,5 +1,5 @@
 from app import app
-from flask import render_template
+from flask import render_template, request, url_for
 from app.models import User, Project
 from wtforms import Form, BooleanField, TextField, PasswordField, validators
 
@@ -27,8 +27,8 @@ def create():
                     form.password.data)
         db_session.add(user)
         flash('Thanks for registering')
-        return redirect(url_for('login'))
-    return render_template('create.html', active="create")
+        return redirect(url_for('create'))
+    return render_template('create.html', active="create", form=form)
 
 class RegistrationForm(Form):
     username = TextField('Username', [validators.Length(min=4, max=25)])
