@@ -1,5 +1,5 @@
 from app import app, db
-from flask import render_template, request, url_for, flash
+from flask import render_template, request, url_for, flash, redirect
 from app.models import User, Project
 from wtforms import Form, BooleanField, TextField, PasswordField, validators
 from hashlib import md5
@@ -27,6 +27,7 @@ def create():
         user = User(name=form.name.data, email=form.email.data,
                     password=md5(form.password.data).hexdigest())
         db.session.add(user)
+        db.session.commit()
         flash('Thanks for registering')
         return redirect(url_for('create'))
     return render_template('create.html', active="create", form=form)

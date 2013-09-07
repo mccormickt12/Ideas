@@ -5,14 +5,14 @@ def print_all_users():
     users = User.query.all()
     for u in users:
         if u:
-            print u.id, u.name, u.major, u.email, u.password, u.year, 'essay: ' + str(u.essay), 'activated: ' + str(u.activated) + 'classes: ' + str(u.classes.all()) + ' intro: ' + str(u.introduction) + ' profile_exists: ' + str(u.photo_exists) + ' pick one: ' + str(u.choose_one)
+            print u.id, u.name, u.email
 
 
 def print_all_projects():
     projects = Project.query.all()
-    for u in users:
-        if u:
-            print u.id, u.name, u.email
+    for p in projects:
+        if p:
+            print p.id, p.name
 
 def remove_samir():
     results = db.session.query(models.User).filter_by(email="makhani@berkeley.edu").all()
@@ -29,6 +29,5 @@ def remove_samir():
 print "==================USERS=================="
 print_all_users()
 print "=================Projects================="
-print_all_classes()
-print "===============EXPERIENCES==============="
-print_all_experiences()
+print_all_projects()
+
