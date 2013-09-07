@@ -1,7 +1,8 @@
-from app import app
-from flask import render_template, request, url_for
+from app import app, db
+from flask import render_template, request, url_for, flash
 from app.models import User, Project
 from wtforms import Form, BooleanField, TextField, PasswordField, validators
+from hashlib import md5
 
 @app.route('/')
 def index():
@@ -19,19 +20,19 @@ def facebook():
 def example2():
     return render_template('example.html', active="example2", names=["Samir", "Shanti", "Tom"])
 
-@app.route('/create/')
+@app.route('/create/', methods=['POST', 'GET'])
 def create():
     form = RegistrationForm(request.form)
     if request.method == 'POST' and form.validate():
-        user = User(form.username.data, form.email.data,
-                    form.password.data)
-        db_session.add(user)
+        user = User(name=form.name.data, email=form.email.data,
+                    password=md5(form.password.data).hexdigest())
+        db.session.add(user)
         flash('Thanks for registering')
         return redirect(url_for('create'))
     return render_template('create.html', active="create", form=form)
 
 class RegistrationForm(Form):
-    username = TextField('Username', [validators.Length(min=4, max=25)])
+    name = TextField('Name', [validators.Length(min=4, max=25)])
     email = TextField('Email Address', [validators.Length(min=6, max=35)])
     password = PasswordField('New Password', [
         validators.Required(),

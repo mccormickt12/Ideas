@@ -1,5 +1,8 @@
 from app import db
 
+YES = 1
+NO = 0
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(64))
@@ -8,6 +11,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique = True)
     password = db.Column(db.String(64))
     year = db.Column(db.String(64))
+    activated = db.Column(db.SmallInteger, default = NO)
     projects = db.relationship('Project', backref = 'author', lazy = 'dynamic')
     
     @property
@@ -33,7 +37,7 @@ class Project(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(64))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    team = db.relationship('User', backref = 'project', lazy = 'dynamic')
+    # team = db.relationship('User', backref = 'project', lazy = 'dynamic')
 
     def __repr__(self):
         return '<Project %r>' % (self.name)
