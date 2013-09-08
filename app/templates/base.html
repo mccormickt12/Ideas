@@ -1,60 +1,67 @@
 <html>
 	<head>
-		<title> iSurvey </title>
+		<title>Ideas @ Berkeley</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 		
 		<!-- Link to stylesheets -->
-		<link rel=stylesheet media=screen type=text/css href="{{ url_for('static', filename='css/bootstrap.min.css') }}" >
-		<script src="{{ url_for('static', filename='js/jquery.js') }}"> </script>
-		<script src="{{ url_for('static', filename='js/bootstrap.js') }}"> </script>
-		<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"> </script>
+		<link rel=stylesheet media=screen type=text/css href="{{ url_for('static', filename='css/style.css') }}" >
+		
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- Link to fonts  -->
+    <script src="//use.edgefonts.net/league-gothic.js"></script>
+    <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,600" rel="stylesheet" />
 	</head>
-	
-	<div class="navbar navbar-default">
-        <div class="container">
-          <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-responsive-collapse">
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="{{url_for('index')}}">iSurvey</a>
-          </div>
-          <div class="navbar-collapse collapse navbar-responsive-collapse">
-            <ul class="nav navbar-nav">
-              {% if active == "home" %}
-              <li class="active"><a href="{{url_for('index')}}">Home</a></li>
-              {% else %}
-              <li><a href="{{url_for('index')}}">Home</a></li>
-              {% endif %}
-              
-              {% if active == "example" %}
-              <li class="active"><a href="{{url_for('example')}}">Example</a></li>
-              {% else %}
-              <li><a href="{{url_for('example')}}">Example</a></li>
-              {% endif %}
 
-              {% if active == "facebook" %}
-              <li class="active"><a href="{{url_for('facebook')}}">FaceBook</a></li>
-              {% else %}
-              <li><a href="{{url_for('facebook')}}">FaceBook</a></li>
-              {% endif %}
+  <body>
+    {% if active != "home" %}
+    <nav class="left-bar-nav">
+      <ul>
+        <li class="left-bar-nav-item" id="discover-nav-item"><a href="{{url_for('example')}}">Discover</a></li>
+        <li class="left-bar-nav-item" id="start-nav-item"><a href="{{url_for('facebook')}}">Start</a></li>
+      </ul>
+    </nav>
+    {% endif %}
+    
+    <div class="content">
+      <header>
+        {% block heading %}{% endblock %}
+      </header>
 
-              {% if active == "example2" %}
-              <li class="active"><a href="{{url_for('example2')}}">Example</a></li>
-              {% else %}
-              <li ><a href="{{url_for('example2')}}">Example</a></li>
-              {% endif %}
+    	{% block content %}
+        <!-- Put content of the page here -->
+      {% endblock %}
+    </div>
 
-              </li>
-            </ul>
-          </div><!-- /.nav-collapse -->
-        </div><!-- /.container -->
-      </div>
-	{% block content %} 
-	
-	{% endblock %}
+    <!-- Scripts  -->
+    <script src="{{ url_for('static', filename='js/jquery.js') }}"> </script>
+    <script>
+      $(document).on('ready', function(){
+        change_content_size();
+        change_projects_size();
+      });
 
+      $(window).on('resize', function(){
+        change_content_size();
+        change_projects_size();
+      })
+
+      function change_content_size() {
+        var content_width = $(window).width() - 210;
+        $('.content').css('width', content_width);
+      }
+
+      function change_projects_size() {
+        var content_width = $('.content').width(),projects_width = 285;
+        if (content_width > (285 * 4)) {
+          projects_width = 285 * 4;
+        } else if (content_width > (285 * 3)) {
+          projects_width = 285 * 3;
+        } else if (content_width > (285 * 2)) {
+          projects_width = 285 * 2;
+        }
+        $('.projects').css('width', projects_width);
+      }
+    </script>
+  </body>
 </html>

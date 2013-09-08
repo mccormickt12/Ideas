@@ -1,0 +1,67 @@
+/* Setting Colors */
+/* Sizes */
+body,
+h1, h2, h3, h4, h5, h6,
+a,
+ul, li {
+  margin: 0;
+  padding: 0; }
+
+h1 {
+  color: #d1ad36;
+  font: normal 70px league-gothic, "Helvetica", "Arial", sans-serif;
+  text-transform: uppercase; }
+
+a,
+li {
+  list-style: none;
+  text-decoration: none; }
+
+.left-bar-nav,
+.content {
+  float: left;
+  height: 100%;
+  padding: 20px; }
+
+.left-bar-nav {
+  width: 130px; }
+
+.left-bar-nav-item {
+  width: 100%;
+  height: 130px;
+  text-align: center;
+  position: relative; }
+  .left-bar-nav-item a {
+    padding: 4%;
+    width: 92%;
+    height: 92%;
+    display: block;
+    color: #f9f9f9;
+    font: normal 25px league-gothic, "Helvetica", "Arial", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.05em; }
+
+#discover-nav-item {
+  background: #ffdd79; }
+
+#start-nav-item {
+  background: #68cbdf; }
+
+.content {
+  position: relative;
+  background: #ffdd79; }
+  .content header {
+    text-align: center;
+    margin-bottom: 20px; }
+
+.projects {
+  overflow: hidden;
+  margin: 0 auto; }
+
+.project {
+  float: left;
+  width: 265px;
+  height: 200px;
+  margin-bottom: 20px;
+  margin-right: 20px;
+  background: #f9f9f9; }
