@@ -38,7 +38,7 @@ class Project(db.Model):
     name = db.Column(db.String(64))
     description = db.Column(db.String(400))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    team = db.relationship('User', backref = 'project', lazy = 'dynamic')
+    # team = db.relationship('User', backref = 'project', lazy = 'dynamic')
 
     def __repr__(self):
         return '<Project %r>' % (self.name)
