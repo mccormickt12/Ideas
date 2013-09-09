@@ -17,19 +17,15 @@ app.url_map.converters['regex'] = RegexConverter
 
 @app.route('/')
 def index():
-    return render_template('index.html', active="home")
+    return render_template('index.html')
 
-@app.route('/example/')
-def example():
-    return render_template('example.html', active="example")
+@app.route('/discover/')
+def discover():
+    return render_template('discover.html')
 
-@app.route('/facebook/')
-def facebook():
-    return render_template('facebook.html', active="facebook")
-
-@app.route('/example2/')
-def example2():
-    return render_template('example.html', active="example2", names=["Samir", "Shanti", "Tom"])
+@app.route('/start/')
+def start():
+    return render_template('new_project.html')
 
 @app.route('/create/', methods=['POST', 'GET'])
 def create():
@@ -42,12 +38,12 @@ def create():
         db.session.add(user)
         db.session.commit()
         flash('Thanks for registering')
-        return redirect(url_for('example'))
+        return redirect(url_for('discover'))
     return render_template('create.html', active="create", form=form)
 
 
 @app.route('/new/project', methods=['POST', 'GET'])
-def project():
+def start():
     if session.get('logged_in'):
         logged_in = True
     else:
@@ -59,7 +55,7 @@ def project():
         project = Project(name=form.name.data, description=form.description.data, user_id=session.get('user_id'))
         db.session.add(project)
         db.session.commit()
-        return redirect(url_for('example'))
+        return redirect(url_for('discover'))
     return render_template('new_project.html', active="project", form=form)
 
 @app.route('/login/', methods=['POST', 'GET'])
@@ -77,7 +73,7 @@ def login():
         user = db.session.query(User).filter_by(email = form.email.data, password = md5(form.password.data).hexdigest() )
         
         # If user exists
-        if user:
+        if user.first():
             user = user[0]
             flash(u'Successfully logged in as %s' % user.name)
             auth_user(user.id)
@@ -94,7 +90,7 @@ def user_page(uname):
         user = user[0]
         return render_template('user.html', user = user)
     else:
-        return render_template('error.html')
+        return render_template('error.html'), 404
 
 @app.route('/<regex("[A-Za-z0-9]{4,20}"):uname>/<regex("[A-Za-z0-9]{4,20}"):proj>')
 def proj_page(uname, proj):
