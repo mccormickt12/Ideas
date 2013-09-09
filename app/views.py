@@ -17,7 +17,7 @@ app.url_map.converters['regex'] = RegexConverter
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', logged_in=session.get('logged_in'))
 
 @app.route('/discover/')
 def discover():
@@ -107,7 +107,7 @@ def proj_page(uname, proj):
         project = db.session.query(Project).filter_by(name = proj, user_id = user.id)
         if project.first():
             project = project[0]
-            return render_template('project.html', user = user, project = project)
+            return render_template('project.html', user = user, project = project, logged_in=session.get('logged_in'))
     return render_template('error.html')
 
 
@@ -126,13 +126,13 @@ def edit_proj(uname, proj):
                     project.name = form.name.data
                     project.description = form.description.data
                     db.session.commit()
-                    return redirect(url_for('proj_page', uname=uname, proj=proj))
+                    return redirect(url_for('proj_page', uname=uname, proj=proj, logged_in=session.get('logged_in')))
                 else:
                     form.name.data = project.name
                     form.description.data = project.description
-                return render_template('edit.html', user=user, project=project, form=form)
+                return render_template('edit.html', user=user, project=project, form=form, logged_in=session.get('logged_in'))
             else:
-                return redirect(url_for('proj_page', uname=uname, proj=proj))
+                return redirect(url_for('proj_page', uname=uname, proj=proj, logged_in=session.get('logged_in')))
     return render_template('error.html')
 
 
