@@ -21,11 +21,11 @@ def index():
 
 @app.route('/discover/')
 def discover():
-    return render_template('discover.html')
+    projects = Project.query.all()
+    users = User.query.all()
+    return render_template('discover.html', projects=projects, User=User, logged_in=session.get('logged_in'))
 
-@app.route('/start/')
-def start():
-    return render_template('new_project.html')
+
 
 @app.route('/create/', methods=['POST', 'GET'])
 def create():
@@ -39,7 +39,7 @@ def create():
         db.session.commit()
         flash('Thanks for registering')
         return redirect(url_for('discover'))
-    return render_template('create.html', active="create", form=form)
+    return render_template('create.html', active="create", form=form, logged_in=session.get('logged_in'))
 
 
 @app.route('/new/project', methods=['POST', 'GET'])
@@ -52,11 +52,11 @@ def start():
         return redirect(url_for('login'))
     form = ProjectForm(request.form)
     if request.method == 'POST' and form.validate():
-        project = Project(name=form.name.data, description=form.description.data, user_id=session.get('user_id'))
+        project = Project(name=form.name.data, description=form.description.data, user_id=session.get('user_id'), logged_in=session.get('logged_in'))
         db.session.add(project)
         db.session.commit()
         return redirect(url_for('discover'))
-    return render_template('new_project.html', active="project", form=form)
+    return render_template('new_project.html', active="project", form=form, logged_in=session.get('logged_in'))
 
 @app.route('/login/', methods=['POST', 'GET'])
 def login():
@@ -80,7 +80,14 @@ def login():
             return redirect(url_for('login'))
         else:
             flash("Incorrect username and password")
-    return render_template('login.html', form=form, logged_in=logged_in)
+    return render_template('login.html', form=form, logged_in=session.get('logged_in'))
+
+@app.route('/logout/')
+def logout():
+    session['logged_in'] = False
+    session.clear()
+    flash("You've been logged out")
+    return redirect('/')
 
 
 @app.route('/<regex("[A-Za-z0-9]{4,20}"):uname>/')
@@ -88,7 +95,7 @@ def user_page(uname):
     user = db.session.query(User).filter_by(user_name = uname)
     if user.first():
         user = user[0]
-        return render_template('user.html', user = user)
+        return render_template('user.html', user = user, logged_in=session.get('logged_in'))
     else:
         return render_template('error.html'), 404
 

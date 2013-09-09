@@ -13,7 +13,7 @@ def print_all_projects():
     projects = Project.query.all()
     for p in projects:
         if p:
-            print p.id, p.name
+            print p.id, p.name, p.author.name
 
 def remove_samir():
     results = db.session.query(models.User).filter_by(email="makhani@berkeley.edu").all()

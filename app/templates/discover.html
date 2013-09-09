@@ -7,15 +7,15 @@
 {% block content %}
 
 <ul class="projects">
-  <li class="project"><a href="#"></a></li>
-  <li class="project"><a href="#"></a></li>
-  <li class="project"><a href="#"></a></li>
-  <li class="project"><a href="#"></a></li>
-  <li class="project"><a href="#"></a></li>
-  <li class="project"><a href="#"></a></li>
-  <li class="project"><a href="#"></a></li>
-  <li class="project"><a href="#"></a></li>
-  <li class="project"><a href="#"></a></li>
+  {% for project in projects %}
+  <li class="project center">
+    <a href="/{{project.author.user_name}}/{{project.name}}">
+       {{project.name}} <br>
+       {{project.description}} <br>
+       {{'Created by: '~User.query.filter_by(id=project.user_id)[0].name}}
+    </a>
+  </li>
+  {% endfor %}
 </ul>
 
 {% endblock %}
