@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+ 
+{{ user.user_name }}
+<br>
+
+{% for project in user.projects %}
+  Project title : <a href="{{ project.name }}"> {{ project.name }} </a>
+  <br>
+  Project description : {{ project.description }}
+  <br>
+{% endfor %}
+
+{% endblock %}

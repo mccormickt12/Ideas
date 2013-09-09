@@ -6,6 +6,7 @@ NO = 0
 class User(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(64))
+    user_name = db.Column(db.String(64))
     major = db.Column(db.String(64))
     minor = db.Column(db.String(64))
     email = db.Column(db.String(120), unique = True)

@@ -3,6 +3,17 @@ from flask import render_template, request, url_for, flash, redirect, session
 from app.models import User, Project
 from wtforms import Form, BooleanField, TextField, PasswordField, validators
 from hashlib import md5
+from werkzeug.routing import BaseConverter
+
+
+
+class RegexConverter(BaseConverter):
+    def __init__(self, url_map, *items):
+        super(RegexConverter, self).__init__(url_map)
+        self.regex = items[0]
+
+
+app.url_map.converters['regex'] = RegexConverter
 
 @app.route('/')
 def index():
@@ -24,8 +35,8 @@ def example2():
 def create():
     form = RegistrationForm(request.form)
     if request.method == 'POST' and form.validate():
-        user = User(name=form.name.data, email=form.email.data,
-                    password=md5(form.password.data).hexdigest(),
+        user = User(name=form.name.data, user_name=form.user_name.data, 
+                    email=form.email.data, password=md5(form.password.data).hexdigest(),
                     major=form.major.data, minor=form.minor.data,
                     year=form.year.data)
         db.session.add(user)
@@ -76,8 +87,30 @@ def login():
     return render_template('login.html', form=form, logged_in=logged_in)
 
 
+@app.route('/<regex("[A-Za-z0-9]{4,20}"):uname>/')
+def user_page(uname):
+    user = db.session.query(User).filter_by(user_name = uname)
+    if user.first():
+        user = user[0]
+        return render_template('user.html', user = user)
+    else:
+        return render_template('error.html')
+
+@app.route('/<regex("[A-Za-z0-9]{4,20}"):uname>/<regex("[A-Za-z0-9]{4,20}"):proj>')
+def proj_page(uname, proj):
+    user = db.session.query(User).filter_by(user_name = uname)
+    if user.first():
+        user = user[0]
+        project = db.session.query(Project).filter_by(name = proj, user_id = user.id)
+        if project.first():
+            project = project[0]
+            return render_template('project.html', user = user, project = project)
+    return render_template('error.html')
+
+
 class RegistrationForm(Form):
     name = TextField('Name', [validators.Length(min=4, max=25)])
+    user_name = TextField('User name', [validators.Length(min=4, max=20)])
     email = TextField('Email Address', [validators.Length(min=6, max=35)])
     major = TextField('Major', [validators.Length(min=2, max=30)])
     minor = TextField('Minor', [validators.Length(min=2, max=30)])
