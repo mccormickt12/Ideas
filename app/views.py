@@ -1,7 +1,7 @@
 from app import app, db
 from flask import render_template, request, url_for, flash, redirect, session
 from app.models import User, Project
-from wtforms import Form, BooleanField, TextField, PasswordField, validators
+from wtforms import Form, BooleanField, TextField, TextAreaField, PasswordField, validators
 from hashlib import md5
 from werkzeug.routing import BaseConverter
 
@@ -111,6 +111,34 @@ def proj_page(uname, proj):
     return render_template('error.html')
 
 
+@app.route('/<regex("[A-Za-z0-9]{4,20}"):uname>/<regex("[A-Za-z0-9]{4,20}"):proj>/edit/', methods=['GET', 'POST'])
+def edit_proj(uname, proj):
+    
+    user = db.session.query(User).filter_by(user_name = uname)
+    if user.first():
+        user = user[0]
+        project = db.session.query(Project).filter_by(name = proj, user_id = user.id)
+        if project.first():
+            project = project[0]
+            if session.get('logged_in') and user.id == session.get('user_id'):
+                form = ProjectForm(request.form)
+                if request.method == 'POST' and form.validate():
+                    project.name = form.name.data
+                    project.description = form.description.data
+                    db.session.commit()
+                    return redirect(url_for('proj_page', uname=uname, proj=proj))
+                else:
+                    form.name.data = project.name
+                    form.description.data = project.description
+                return render_template('edit.html', user=user, project=project, form=form)
+            else:
+                return redirect(url_for('proj_page', uname=uname, proj=proj))
+    return render_template('error.html')
+
+
+
+
+
 class RegistrationForm(Form):
     name = TextField('Name', [validators.Length(min=4, max=25)])
     user_name = TextField('User name', [validators.Length(min=4, max=20)])
@@ -128,7 +156,7 @@ class RegistrationForm(Form):
 
 class ProjectForm(Form):
     name = TextField('Name', [validators.Length(min=4, max=25)])
-    description = TextField('Description', [validators.Length(min=10, max=400)])
+    description = TextAreaField('Description', [validators.Length(min=10, max=400)])
 
 class LoginForm(Form):
     email = TextField('Email', [validators.Required()])
