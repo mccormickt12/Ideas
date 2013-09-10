@@ -17,7 +17,7 @@ app.url_map.converters['regex'] = RegexConverter
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', logged_in=session.get('logged_in'))
 
 @app.route('/discover/')
 def discover():
@@ -107,7 +107,7 @@ def proj_page(uname, proj):
         project = db.session.query(Project).filter_by(name = proj, user_id = user.id)
         if project.first():
             project = project[0]
-            return render_template('project.html', user = user, project = project)
+            return render_template('project.html', user = user, project = project, logged_in=session.get('logged_in'))
     return render_template('error.html')
 
 
@@ -129,6 +129,7 @@ class RegistrationForm(Form):
 class ProjectForm(Form):
     name = TextField('Name', [validators.Length(min=4, max=25)])
     description = TextField('Description', [validators.Length(min=10, max=400)])
+    progress = TextField('Progress', choices=["Plan", "Started", "Ongoing", "Completed"])
 
 class LoginForm(Form):
     email = TextField('Email', [validators.Required()])

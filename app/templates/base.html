@@ -20,7 +20,7 @@
         <li class="left-bar-nav-item" id="discover-nav-item"><a href="{{url_for('discover')}}">Discover</a></li>
         <li class="left-bar-nav-item" id="start-nav-item"><a href="{{url_for('start')}}">Start</a></li>
         {% if logged_in %}
-        <li class="left-bar-nav-item" style="float:bottom;"><a style="color:#68cbdf"href="{{url_for('logout')}}">Logout</a></li>
+        <li class="left-bar-nav-item" style="float:bottom; height:30px"><a style="color:#68cbdf"href="{{url_for('logout')}}">Logout</a></li>
         {% else %}
         <li class="left-bar-nav-item" style="float:bottom; height:30px"><a style="color:#68cbdf"href="{{url_for('login')}}">Login</a></li>
         {% endif %}

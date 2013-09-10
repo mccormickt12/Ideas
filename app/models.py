@@ -12,6 +12,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique = True)
     password = db.Column(db.String(64))
     year = db.Column(db.String(64))
+    progress = db.Column(db.String(64))
     activated = db.Column(db.SmallInteger, default = NO)
     projects = db.relationship('Project', backref = 'author', lazy = 'dynamic')
     
