@@ -166,6 +166,8 @@ class RegistrationForm(Form):
 class ProjectForm(Form):
     name = TextField('Name', [validators.Length(min=4, max=25)])
     description = TextAreaField('Description', [validators.Length(min=10, max=400)])
+    # progress = TextField('Progress', choices=["Plan", "Started", "Ongoing", "Completed"])
+
 
 class LoginForm(Form):
     email = TextField('Email', [validators.Required()])
