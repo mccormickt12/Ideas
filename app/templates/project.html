@@ -7,8 +7,13 @@
 
 
 Project title : {{ project.name }}
-{% if logged_in %}
+  {% if logged_in and user.id == me%}
 	<a href = "{{ url_for('edit_proj', uname=user.user_name, proj=project.name) }}">Edit</a>
+{% endif %}
+{% if logged_in and not user.id == me %}
+	<form method=post action="">
+		<p><input type=submit value=Join>
+	</form>
 {% endif %}
 <br>
 Project description : {{ project.description }}

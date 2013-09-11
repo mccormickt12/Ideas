@@ -9,7 +9,7 @@
 <ul class="projects">
   {% for project in projects %}
   <li class="project center">
-    <a href="/{{project.author.user_name}}/{{project.name}}">
+    <a href="/{{project.author.user_name}}/{{project.name.replace(' ', '%20')}}">
        {{project.name}} <br>
        {{project.description}} <br>
        {{'Created by: '~User.query.filter_by(id=project.user_id)[0].name}}

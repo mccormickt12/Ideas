@@ -7,7 +7,9 @@
 
 {% for project in user.projects %}
   Project title : <a href="{{ project.name }}"> {{ project.name }} </a>
-  <a href = '{{url_for('edit_proj', uname = user.user_name, proj = project.name)}}'>Edit</a> Delete
+  {% if logged_in and user.id == me%}
+  	<a href = '{{url_for('edit_proj', uname = user.user_name, proj = project.name)}}'>Edit</a> Delete
+  {% endif %}
   <br>
   Project description : {{ project.description }}
   <br>

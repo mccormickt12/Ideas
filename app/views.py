@@ -15,6 +15,7 @@ class RegexConverter(BaseConverter):
 
 app.url_map.converters['regex'] = RegexConverter
 
+
 @app.route('/')
 def index():
     return render_template('index.html', logged_in=session.get('logged_in'))
@@ -52,7 +53,10 @@ def start():
         return redirect(url_for('login'))
     form = ProjectForm(request.form)
     if request.method == 'POST' and form.validate():
-        project = Project(name=form.name.data, description=form.description.data, user_id=session.get('user_id'), logged_in=session.get('logged_in'))
+        if ' ' in form.name.data:
+            flash("Project cannot have spaces, try underscores or dashes instead!")
+            return render_template('new_project.html', active="project", form=form, logged_in=session.get('logged_in')) 
+        project = Project(name=form.name.data, description=form.description.data, user_id=session.get('user_id'))
         db.session.add(project)
         db.session.commit()
         return redirect(url_for('discover'))
@@ -95,11 +99,11 @@ def user_page(uname):
     user = db.session.query(User).filter_by(user_name = uname)
     if user.first():
         user = user[0]
-        return render_template('user.html', user = user, logged_in=session.get('logged_in'))
+        return render_template('user.html', user=user, logged_in=session.get('logged_in'), me=session.get('user_id'))
     else:
         return render_template('error.html'), 404
 
-@app.route('/<regex("[A-Za-z0-9]{4,20}"):uname>/<regex("[A-Za-z0-9]{4,20}"):proj>')
+@app.route('/<regex("[A-Za-z0-9]{4,20}"):uname>/<regex("[ A-Za-z0-9-_%]{4,20}"):proj>', methods=['GET', 'POST'])
 def proj_page(uname, proj):
     user = db.session.query(User).filter_by(user_name = uname)
     if user.first():
@@ -107,11 +111,16 @@ def proj_page(uname, proj):
         project = db.session.query(Project).filter_by(name = proj, user_id = user.id)
         if project.first():
             project = project[0]
-            return render_template('project.html', user = user, project = project, logged_in=session.get('logged_in'))
+            if request.method == 'POST':
+                if project.addMember(user.id):
+                    flash("You have now joined this project")
+                else: 
+                    flash("Already joined this project")
+            return render_template('project.html', user = user, project = project, logged_in=session.get('logged_in'), me=session.get('user_id'))
     return render_template('error.html')
 
 
-@app.route('/<regex("[A-Za-z0-9]{4,20}"):uname>/<regex("[A-Za-z0-9]{4,20}"):proj>/edit/', methods=['GET', 'POST'])
+@app.route('/<regex("[A-Za-z0-9]{4,20}"):uname>/<regex("[ A-Za-z0-9-_%]{4,20}"):proj>/edit/', methods=['GET', 'POST'])
 def edit_proj(uname, proj):
     
     user = db.session.query(User).filter_by(user_name = uname)
