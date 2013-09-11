@@ -47,8 +47,17 @@ class User(db.Model):
         db.session.commit()
 
     def getMemberOf(self):
-        memList = self.member_of.split()
-        return [int(x) for x in memList]
+        if self.member_of:
+            projList = self.member_of.split()
+            projList = [int(x) for x in projList]
+            projects = []
+            for p in projList:
+                proj = Project.query.filter_by(id=p)
+                if proj:
+                    projects.append(proj[0])
+            return projects
+        else:
+            return []
 
 
 class Project(db.Model):
@@ -78,6 +87,15 @@ class Project(db.Model):
         return True
 
     def getMembers(self):
-        memList = self.members.split()
-        return [int(x) for x in memList]
+        if self.members:
+            memList = self.members.split()
+            memList = [int(x) for x in memList]
+            members = []
+            for m in memList:
+                user = User.query.filter_by(id=m)
+                if user:
+                    members.append(user[0])
+            return members
+        else:
+            return []
 

@@ -19,5 +19,11 @@ Project title : {{ project.name }}
 Project description : {{ project.description }}
 <br>
 
+<hr>
+List of Members
+{% for member in members %}
+	<br>
+	{{ member.user_name }}
+{% endfor %}
 
 {% endblock %}

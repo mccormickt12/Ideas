@@ -99,7 +99,8 @@ def user_page(uname):
     user = db.session.query(User).filter_by(user_name = uname)
     if user.first():
         user = user[0]
-        return render_template('user.html', user=user, logged_in=session.get('logged_in'), me=session.get('user_id'))
+        return render_template('user.html', user=user, logged_in=session.get('logged_in'), me=session.get('user_id'),
+            projects=user.getMemberOf())
     else:
         return render_template('error.html'), 404
 
@@ -112,11 +113,12 @@ def proj_page(uname, proj):
         if project.first():
             project = project[0]
             if request.method == 'POST':
-                if project.addMember(user.id):
+                if project.addMember(session.get('user_id')):
                     flash("You have now joined this project")
                 else: 
                     flash("Already joined this project")
-            return render_template('project.html', user = user, project = project, logged_in=session.get('logged_in'), me=session.get('user_id'))
+            return render_template('project.html', user = user, project = project, logged_in=session.get('logged_in'),
+             me=session.get('user_id'), members=project.getMembers())
     return render_template('error.html')
 
 
