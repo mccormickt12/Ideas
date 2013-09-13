@@ -155,7 +155,9 @@ def edit_proj(uname, proj):
 
 
 
-
+@app.route('/<regex(".+"):url>')
+def error():
+    return render_template('error.html')
 
 class RegistrationForm(Form):
     name = TextField('Name', [validators.Length(min=4, max=25)])
