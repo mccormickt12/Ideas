@@ -32,14 +32,21 @@ def discover():
 def create():
     form = RegistrationForm(request.form)
     if request.method == 'POST' and form.validate():
-        user = User(name=form.name.data, user_name=form.user_name.data, 
-                    email=form.email.data, password=md5(form.password.data).hexdigest(),
-                    major=form.major.data, minor=form.minor.data,
-                    year=form.year.data)
-        db.session.add(user)
-        db.session.commit()
-        flash('Thanks for registering')
-        return redirect(url_for('discover'))
+        un = User.query.filter_by(user_name=form.user_name.data)
+        e = User.query.filter_by(email=form.email.data)
+        if un.first() or e.first():
+            flash("We already have that username or email.")
+        elif " " in form.user_name.data:
+            flash("No spaces allowed in your username")
+        else:
+            user = User(name=form.name.data, user_name=form.user_name.data, 
+                        email=form.email.data, password=md5(form.password.data).hexdigest(),
+                        major=form.major.data, minor=form.minor.data,
+                        year=form.year.data)
+            db.session.add(user)
+            db.session.commit()
+            flash('Thanks for registering')
+            return redirect(url_for('discover'))
     return render_template('create.html', active="create", form=form, logged_in=session.get('logged_in'))
 
 
@@ -94,7 +101,7 @@ def logout():
     return redirect('/')
 
 
-@app.route('/<regex("[A-Za-z0-9]{4,20}"):uname>/')
+@app.route('/<regex("[A-Za-z0-9-_.]{4,20}"):uname>/')
 def user_page(uname):
     user = db.session.query(User).filter_by(user_name = uname)
     if user.first():
@@ -104,7 +111,7 @@ def user_page(uname):
     else:
         return render_template('error.html'), 404
 
-@app.route('/<regex("[A-Za-z0-9]{4,20}"):uname>/<regex("[ A-Za-z0-9-_%]{4,20}"):proj>', methods=['GET', 'POST'])
+@app.route('/<regex("[A-Za-z0-9-_.]{4,20}"):uname>/<regex("[ A-Za-z0-9-_.%]{4,20}"):proj>', methods=['GET', 'POST'])
 def proj_page(uname, proj):
     user = db.session.query(User).filter_by(user_name = uname)
     if user.first():
@@ -122,7 +129,7 @@ def proj_page(uname, proj):
     return render_template('error.html')
 
 
-@app.route('/<regex("[A-Za-z0-9]{4,20}"):uname>/<regex("[ A-Za-z0-9-_%]{4,20}"):proj>/edit/', methods=['GET', 'POST'])
+@app.route('/<regex("[A-Za-z0-9-_.]{4,20}"):uname>/<regex("[ A-Za-z0-9-_.%]{4,20}"):proj>/edit/', methods=['GET', 'POST'])
 def edit_proj(uname, proj):
     
     user = db.session.query(User).filter_by(user_name = uname)
