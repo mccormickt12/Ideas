@@ -24,6 +24,43 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 def index():
     return render_template('index.html', logged_in=session.get('logged_in'))
 
+
+@app.route('/home/')
+def home():
+    user = User.query.filter_by(id=session.get('user_id'))
+    if session.get('logged_in') and user.first():
+        user = user[0]
+        return render_template('home.html', user=user, logged_in=session.get('logged_in'))
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/home/edit', methods=['GET', 'POST'])
+def edit_profile():
+    user = User.query.filter_by(id=session.get('user_id'))
+    if session.get('logged_in') and user.first():
+        user = user[0]
+        form = RegistrationForm()
+        if request.method == 'POST' and form.validate():
+            user.name=form.name.data
+            user.user_name=form.user_name.data
+            user.email=form.email.data
+            user.major=form.major.data
+            user.minor=form.minor.data
+            user.year=form.year.data
+            flash("Changes successfully made")
+            return redirect(url_for('home'))
+        else:
+            form.name.data = user.name
+            form.user_name.data=user.user_name
+            form.email.data=user.email
+            form.major.data=user.major
+            form.minor.data=user.minor
+            form.year.data=user.year
+
+        return render_template('edit_profile.html', form=form, logged_in=session.get('logged_in'))
+    else:
+        return redirect(url('login'))
+
 @app.route('/discover/')
 def discover():
     projects = Project.query.all()
@@ -135,7 +172,7 @@ def login():
             user = user[0]
             flash(u'Successfully logged in as %s' % user.name)
             auth_user(user.id)
-            return redirect(url_for('login'))
+            return redirect(url_for('home'))
         else:
             flash("Incorrect username and password")
     return render_template('login.html', form=form, logged_in=session.get('logged_in'))
@@ -218,7 +255,9 @@ class RegistrationForm(Form):
     email = TextField('Email Address', [validators.Length(min=6, max=35)])
     major = TextField('Major', [validators.Length(min=2, max=30)])
     minor = TextField('Minor')
-    year = TextField('Year', [validators.Length(min=2, max=30)])
+    year = SelectField('Year', choices=[("Freshman", "Freshman"), ("Sophomore", "Sophomore"),
+     ("Junior", "Junior"), ("Senior", "Senior"), ("Super Senior", "Super Senior"),
+     ("Grad Student", "Grad Student"), ("Alumni", "Alumni")])
     password = PasswordField('New Password', [
         validators.Required(),
         validators.EqualTo('confirm', message='Passwords must match')
@@ -236,6 +275,10 @@ class ProjectForm(Form):
      ("Ongoing", "Ongoing"), ("Completed", "Completed")])
     image = FileField('Project Image')
 
+
+class ApplyForm(Form):
+    skills = TextAreaField("What skills do you offer? ", [validators.Length(min=2, max=25)])
+    why = TextAreaField("Why do you want to help? ", [validators.Length(min=2, max=25)])
 
 class LoginForm(Form):
     email = TextField('Email', [validators.Required()])
