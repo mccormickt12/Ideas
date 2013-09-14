@@ -1,7 +1,7 @@
 from app import app, db
 from flask import render_template, request, url_for, flash, redirect, session
 from app.models import User, Project
-from wtforms import Form, BooleanField, TextField, TextAreaField, PasswordField, validators
+from wtforms import Form, BooleanField, FileField, TextField, TextAreaField, PasswordField, validators
 from hashlib import md5
 from werkzeug.routing import BaseConverter
 
@@ -14,7 +14,7 @@ class RegexConverter(BaseConverter):
 
 
 app.url_map.converters['regex'] = RegexConverter
-
+MAX_UPLOAD_SIZE = 1024 * 1024
 
 @app.route('/')
 def index():
@@ -63,6 +63,10 @@ def start():
         if ' ' in form.name.data:
             flash("Project cannot have spaces, try underscores or dashes instead!")
             return render_template('new_project.html', active="project", form=form, logged_in=session.get('logged_in')) 
+
+        if form.image.data:
+            image_data = request.files
+
         project = Project(name=form.name.data, description=form.description.data, user_id=session.get('user_id'))
         db.session.add(project)
         db.session.commit()
@@ -95,6 +99,18 @@ def login():
 
 @app.route('/logout/')
 def logout():
+    
+    db_user = User.query.filter_by(id=session['user_id'])[0]
+
+    if db_user.photo_exists:
+        filename = db_user.photo_name
+        profile_url = os.path.join('static/img', filename)
+        full_profile_url = 'app/' + profile_url
+        try:
+            os.remove(full_profile_url)
+        except OSError:
+            flash("Profile was deleted for some reason")
+
     session['logged_in'] = False
     session.clear()
     flash("You've been logged out")
@@ -177,6 +193,7 @@ class RegistrationForm(Form):
 class ProjectForm(Form):
     name = TextField('Name', [validators.Length(min=4, max=25)])
     description = TextAreaField('Description', [validators.Length(min=10, max=400)])
+    image = FileField('Project Image')
     # progress = TextField('Progress', choices=["Plan", "Started", "Ongoing", "Completed"])
 
 
