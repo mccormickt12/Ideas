@@ -12,7 +12,7 @@
 
 <ul class="projects">
   {% for project in projects %}
-  <li class="project" style="background: url('{{ url_for('static', filename='img/'~project.photo_name) }}');">
+  <li class="project" style="background: url('{{ url_for('static', filename='img/'~project.photo_name) }}');background-size: 100% auto;">
     <a href="/{{project.author.user_name}}/{{project.name.replace(' ', '%20')}}">
     <div class="project-info">
       <h2>{{project.name}}</h2>
