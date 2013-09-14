@@ -1,7 +1,7 @@
 from app import app, db
 from flask import render_template, request, url_for, flash, redirect, session
 from app.models import User, Project
-from wtforms import Form, BooleanField, TextField, TextAreaField, PasswordField, validators
+from wtforms import Form, BooleanField, TextField, TextAreaField, PasswordField, validators, SelectField
 from hashlib import md5
 from werkzeug.routing import BaseConverter
 
@@ -23,6 +23,7 @@ def index():
 @app.route('/discover/')
 def discover():
     projects = Project.query.all()
+    projects = projects[::-1]
     users = User.query.all()
     return render_template('discover.html', projects=projects, User=User, logged_in=session.get('logged_in'))
 
@@ -63,7 +64,7 @@ def start():
         if ' ' in form.name.data:
             flash("Project cannot have spaces, try underscores or dashes instead!")
             return render_template('new_project.html', active="project", form=form, logged_in=session.get('logged_in')) 
-        project = Project(name=form.name.data, description=form.description.data, user_id=session.get('user_id'))
+        project = Project(name=form.name.data,about=form.about.data,help=form.help.data, description=form.description.data, progress=form.progress.data, user_id=session.get('user_id'))
         db.session.add(project)
         db.session.commit()
         return redirect(url_for('discover'))
@@ -142,12 +143,18 @@ def edit_proj(uname, proj):
                 form = ProjectForm(request.form)
                 if request.method == 'POST' and form.validate():
                     project.name = form.name.data
+                    project.about = form.about.data
+                    project.help = form.help.data
                     project.description = form.description.data
+                    project.progress = form.description.data
                     db.session.commit()
                     return redirect(url_for('proj_page', uname=uname, proj=proj, logged_in=session.get('logged_in')))
                 else:
                     form.name.data = project.name
+                    form.about.data = project.about
+                    form.help.data = project.help
                     form.description.data = project.description
+                    form.progress.data = project.progress
                 return render_template('edit.html', user=user, project=project, form=form, logged_in=session.get('logged_in'))
             else:
                 return redirect(url_for('proj_page', uname=uname, proj=proj, logged_in=session.get('logged_in')))
@@ -164,7 +171,7 @@ class RegistrationForm(Form):
     user_name = TextField('User name', [validators.Length(min=4, max=20)])
     email = TextField('Email Address', [validators.Length(min=6, max=35)])
     major = TextField('Major', [validators.Length(min=2, max=30)])
-    minor = TextField('Minor', [validators.Length(min=2, max=30)])
+    minor = TextField('Minor')
     year = TextField('Year', [validators.Length(min=2, max=30)])
     password = PasswordField('New Password', [
         validators.Required(),
@@ -175,9 +182,12 @@ class RegistrationForm(Form):
 
 
 class ProjectForm(Form):
-    name = TextField('Name', [validators.Length(min=4, max=25)])
-    description = TextAreaField('Description', [validators.Length(min=10, max=400)])
-    # progress = TextField('Progress', choices=["Plan", "Started", "Ongoing", "Completed"])
+    name = TextField('Name', [validators.Length(min=2, max=25)])
+    about = TextAreaField('About the Team', [validators.Length(min=10, max=400)])
+    help = TextAreaField('How can people help', [validators.Length(min=10, max=400)])
+    description = TextAreaField('Project Description', [validators.Length(min=10, max=400)])
+    progress = SelectField('Progress', choices=[("Plan", "Plan"), ("Started", "Started"),
+     ("Ongoing", "Ongoing"), ("Completed", "Completed")])
 
 
 class LoginForm(Form):

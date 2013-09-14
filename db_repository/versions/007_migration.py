@@ -5,17 +5,15 @@ from migrate import *
 from migrate.changeset import schema
 pre_meta = MetaData()
 post_meta = MetaData()
-members = Table('members', pre_meta,
-    Column('user_id', Integer),
-    Column('project_id', Integer),
-)
-
 project = Table('project', post_meta,
     Column('id', Integer, primary_key=True, nullable=False),
     Column('name', String(length=64)),
+    Column('about', String(length=400)),
+    Column('help', String(length=400)),
     Column('description', String(length=400)),
+    Column('progress', String(length=15)),
     Column('user_id', Integer),
-    Column('members', String(length=500)),
+    Column('members', String(length=400)),
 )
 
 
@@ -24,13 +22,13 @@ def upgrade(migrate_engine):
     # migrate_engine to your metadata
     pre_meta.bind = migrate_engine
     post_meta.bind = migrate_engine
-    pre_meta.tables['members'].drop()
-    post_meta.tables['project'].columns['members'].create()
+    post_meta.tables['project'].columns['about'].create()
+    post_meta.tables['project'].columns['help'].create()
 
 
 def downgrade(migrate_engine):
     # Operations to reverse the above upgrade go here.
     pre_meta.bind = migrate_engine
     post_meta.bind = migrate_engine
-    pre_meta.tables['members'].create()
-    post_meta.tables['project'].columns['members'].drop()
+    post_meta.tables['project'].columns['about'].drop()
+    post_meta.tables['project'].columns['help'].drop()

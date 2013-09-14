@@ -63,7 +63,10 @@ class User(db.Model):
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(64))
+    about = db.Column(db.String(400))
+    help = db.Column(db.String(400))
     description = db.Column(db.String(400))
+    progress = db.Column(db.String(15))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     members = db.Column(db.String(400))
 
