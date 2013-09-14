@@ -12,12 +12,12 @@
 
 <ul class="projects">
   {% for project in projects %}
-  <li class="project">
+  <li class="project" style="background: url('{{ url_for('static', filename='img/'~project.photo_name) }}');">
     <a href="/{{project.author.user_name}}/{{project.name.replace(' ', '%20')}}">
     <div class="project-info">
       <h2>{{project.name}}</h2>
       <h3>{{project.description}}</h3>
-      <h4>{{'Created by: '~User.query.filter_by(    id=project.user_id)[0].name}}</h4>
+      <h4>{{'Created by: '~User.query.filter_by(id=project.user_id)[0].name}}</h4>
     </div>
     </a>
   </li>

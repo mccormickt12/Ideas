@@ -6,10 +6,11 @@
 <form method=post action="">
   <dl>
     {{ render_field(form.name) }}
-    {{ render_field(form.about) }}
-    {{ render_field(form.help) }}
-    {{ render_field(form.description) }}
-    {{ render_field(form.progress) }}
+    {{ render_field(form.user_name) }}
+    {{ render_field(form.email) }}
+    {{ render_field(form.major) }}
+    {{ render_field(form.minor) }}
+    {{ render_field(form.year) }}
   </dl>
   <p><input type=submit value=Register>
 </form>

@@ -1,9 +1,11 @@
 from app import app, db
 from flask import render_template, request, url_for, flash, redirect, session
-from app.models import User, Project
-from wtforms import Form, BooleanField, FileField, TextField, TextAreaField, PasswordField, validators
+from app.models import User, Project, YES, NO
+from wtforms import Form, BooleanField, FileField, TextField, TextAreaField, PasswordField, validators, SelectField
 from hashlib import md5
 from werkzeug.routing import BaseConverter
+from werkzeug import secure_filename
+import os
 
 
 
@@ -15,14 +17,54 @@ class RegexConverter(BaseConverter):
 
 app.url_map.converters['regex'] = RegexConverter
 MAX_UPLOAD_SIZE = 1024 * 1024
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+
 
 @app.route('/')
 def index():
     return render_template('index.html', logged_in=session.get('logged_in'))
 
+
+@app.route('/home/')
+def home():
+    user = User.query.filter_by(id=session.get('user_id'))
+    if session.get('logged_in') and user.first():
+        user = user[0]
+        return render_template('home.html', user=user, logged_in=session.get('logged_in'))
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/home/edit', methods=['GET', 'POST'])
+def edit_profile():
+    user = User.query.filter_by(id=session.get('user_id'))
+    if session.get('logged_in') and user.first():
+        user = user[0]
+        form = RegistrationForm()
+        if request.method == 'POST' and form.validate():
+            user.name=form.name.data
+            user.user_name=form.user_name.data
+            user.email=form.email.data
+            user.major=form.major.data
+            user.minor=form.minor.data
+            user.year=form.year.data
+            flash("Changes successfully made")
+            return redirect(url_for('home'))
+        else:
+            form.name.data = user.name
+            form.user_name.data=user.user_name
+            form.email.data=user.email
+            form.major.data=user.major
+            form.minor.data=user.minor
+            form.year.data=user.year
+
+        return render_template('edit_profile.html', form=form, logged_in=session.get('logged_in'))
+    else:
+        return redirect(url('login'))
+
 @app.route('/discover/')
 def discover():
     projects = Project.query.all()
+    projects = projects[::-1]
     users = User.query.all()
     return render_template('discover.html', projects=projects, User=User, logged_in=session.get('logged_in'))
 
@@ -63,13 +105,51 @@ def start():
         if ' ' in form.name.data:
             flash("Project cannot have spaces, try underscores or dashes instead!")
             return render_template('new_project.html', active="project", form=form, logged_in=session.get('logged_in')) 
+        if request.files.get('image', None):
+            
+            file = request.files['image']
+            if len(file.filename) == 0: 
+                flash("Please upload a file.")
+                return render_template('new_project.html', active="project", form=form, logged_in=session.get('logged_in')) 
+            
+            #Check whether file is the correct format (png, jpg, jpeg, or gif)
+            if not allowed_file(file.filename):
+                flash("Please upload a png, jpg, or gif type photo")
+                return render_template('new_project.html', active="project", form=form, logged_in=session.get('logged_in')) 
 
-        if form.image.data:
-            image_data = request.files
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                extension = filename.rsplit('.', 1)[1]
 
-        project = Project(name=form.name.data, description=form.description.data, user_id=session.get('user_id'))
+
+                #Temporarily write File to images folder
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))                    
+
+                #Check File Size
+                temp = open(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                size = len(temp.read())
+                if size > MAX_UPLOAD_SIZE:
+                    flash("Please upload pictures less than 1mb.")
+                    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                    return render_template('new_project.html', active="project", form=form, logged_in=session.get('logged_in')) 
+
+                profile_url = os.path.join('static/img', filename)
+                full_profile_url = 'app/' + profile_url
+                
+                # Save File to DB
+                f = open(full_profile_url, 'rb')
+                binary_contents = f.read()
+                photo_file = binary_contents
+
+                photo_exists = YES
+                photo_name = filename
+        else:
+            flash("Please upload a file BITCH")
+        
+        project = Project(name=form.name.data, description=form.description.data, user_id=session.get('user_id'), photo_file=binary_contents, photo_exists=photo_exists, photo_name=photo_name)
         db.session.add(project)
         db.session.commit()
+        
         return redirect(url_for('discover'))
     return render_template('new_project.html', active="project", form=form, logged_in=session.get('logged_in'))
 
@@ -92,25 +172,13 @@ def login():
             user = user[0]
             flash(u'Successfully logged in as %s' % user.name)
             auth_user(user.id)
-            return redirect(url_for('login'))
+            return redirect(url_for('home'))
         else:
             flash("Incorrect username and password")
     return render_template('login.html', form=form, logged_in=session.get('logged_in'))
 
 @app.route('/logout/')
 def logout():
-    
-    db_user = User.query.filter_by(id=session['user_id'])[0]
-
-    if db_user.photo_exists:
-        filename = db_user.photo_name
-        profile_url = os.path.join('static/img', filename)
-        full_profile_url = 'app/' + profile_url
-        try:
-            os.remove(full_profile_url)
-        except OSError:
-            flash("Profile was deleted for some reason")
-
     session['logged_in'] = False
     session.clear()
     flash("You've been logged out")
@@ -158,12 +226,18 @@ def edit_proj(uname, proj):
                 form = ProjectForm(request.form)
                 if request.method == 'POST' and form.validate():
                     project.name = form.name.data
+                    project.about = form.about.data
+                    project.help = form.help.data
                     project.description = form.description.data
+                    project.progress = form.description.data
                     db.session.commit()
                     return redirect(url_for('proj_page', uname=uname, proj=proj, logged_in=session.get('logged_in')))
                 else:
                     form.name.data = project.name
+                    form.about.data = project.about
+                    form.help.data = project.help
                     form.description.data = project.description
+                    form.progress.data = project.progress
                 return render_template('edit.html', user=user, project=project, form=form, logged_in=session.get('logged_in'))
             else:
                 return redirect(url_for('proj_page', uname=uname, proj=proj, logged_in=session.get('logged_in')))
@@ -180,8 +254,10 @@ class RegistrationForm(Form):
     user_name = TextField('User name', [validators.Length(min=4, max=20)])
     email = TextField('Email Address', [validators.Length(min=6, max=35)])
     major = TextField('Major', [validators.Length(min=2, max=30)])
-    minor = TextField('Minor', [validators.Length(min=2, max=30)])
-    year = TextField('Year', [validators.Length(min=2, max=30)])
+    minor = TextField('Minor')
+    year = SelectField('Year', choices=[("Freshman", "Freshman"), ("Sophomore", "Sophomore"),
+     ("Junior", "Junior"), ("Senior", "Senior"), ("Super Senior", "Super Senior"),
+     ("Grad Student", "Grad Student"), ("Alumni", "Alumni")])
     password = PasswordField('New Password', [
         validators.Required(),
         validators.EqualTo('confirm', message='Passwords must match')
@@ -191,11 +267,18 @@ class RegistrationForm(Form):
 
 
 class ProjectForm(Form):
-    name = TextField('Name', [validators.Length(min=4, max=25)])
-    description = TextAreaField('Description', [validators.Length(min=10, max=400)])
+    name = TextField('Name', [validators.Length(min=2, max=25)])
+    about = TextAreaField('About the Team', [validators.Length(min=10, max=400)])
+    help = TextAreaField('How can people help', [validators.Length(min=10, max=400)])
+    description = TextAreaField('Project Description', [validators.Length(min=10, max=400)])
+    progress = SelectField('Progress', choices=[("Plan", "Plan"), ("Started", "Started"),
+     ("Ongoing", "Ongoing"), ("Completed", "Completed")])
     image = FileField('Project Image')
-    # progress = TextField('Progress', choices=["Plan", "Started", "Ongoing", "Completed"])
 
+
+class ApplyForm(Form):
+    skills = TextAreaField("What skills do you offer? ", [validators.Length(min=2, max=25)])
+    why = TextAreaField("Why do you want to help? ", [validators.Length(min=2, max=25)])
 
 class LoginForm(Form):
     email = TextField('Email', [validators.Required()])
@@ -205,6 +288,9 @@ def auth_user(user_id):
     session['user_id'] = user_id
     session['logged_in'] = True
 
+def allowed_file(filename):
+    return '.' in filename and \
+           (filename.rsplit('.', 1)[1]).lower() in ALLOWED_EXTENSIONS
 
 
 
