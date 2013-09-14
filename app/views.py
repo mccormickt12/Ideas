@@ -1,9 +1,11 @@
 from app import app, db
 from flask import render_template, request, url_for, flash, redirect, session
-from app.models import User, Project
-from wtforms import Form, BooleanField, TextField, TextAreaField, PasswordField, validators, SelectField
+from app.models import User, Project, YES, NO
+from wtforms import Form, BooleanField, FileField, TextField, TextAreaField, PasswordField, validators, SelectField
 from hashlib import md5
 from werkzeug.routing import BaseConverter
+from werkzeug import secure_filename
+import os
 
 
 
@@ -15,6 +17,8 @@ class RegexConverter(BaseConverter):
 
 app.url_map.converters['regex'] = RegexConverter
 MAX_UPLOAD_SIZE = 1024 * 1024
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+
 
 @app.route('/')
 def index():
@@ -64,10 +68,51 @@ def start():
         if ' ' in form.name.data:
             flash("Project cannot have spaces, try underscores or dashes instead!")
             return render_template('new_project.html', active="project", form=form, logged_in=session.get('logged_in')) 
-        project = Project(name=form.name.data,about=form.about.data,help=form.help.data, description=form.description.data, progress=form.progress.data, user_id=session.get('user_id'))
+        if request.files.get('image', None):
+            
+            file = request.files['image']
+            if len(file.filename) == 0: 
+                flash("Please upload a file.")
+                return render_template('new_project.html', active="project", form=form, logged_in=session.get('logged_in')) 
+            
+            #Check whether file is the correct format (png, jpg, jpeg, or gif)
+            if not allowed_file(file.filename):
+                flash("Please upload a png, jpg, or gif type photo")
+                return render_template('new_project.html', active="project", form=form, logged_in=session.get('logged_in')) 
 
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                extension = filename.rsplit('.', 1)[1]
+
+
+                #Temporarily write File to images folder
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))                    
+
+                #Check File Size
+                temp = open(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                size = len(temp.read())
+                if size > MAX_UPLOAD_SIZE:
+                    flash("Please upload pictures less than 1mb.")
+                    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                    return render_template('new_project.html', active="project", form=form, logged_in=session.get('logged_in')) 
+
+                profile_url = os.path.join('static/img', filename)
+                full_profile_url = 'app/' + profile_url
+                
+                # Save File to DB
+                f = open(full_profile_url, 'rb')
+                binary_contents = f.read()
+                photo_file = binary_contents
+
+                photo_exists = YES
+                photo_name = filename
+        else:
+            flash("Please upload a file BITCH")
+        
+        project = Project(name=form.name.data, description=form.description.data, user_id=session.get('user_id'), photo_file=binary_contents, photo_exists=photo_exists, photo_name=photo_name)
         db.session.add(project)
         db.session.commit()
+        
         return redirect(url_for('discover'))
     return render_template('new_project.html', active="project", form=form, logged_in=session.get('logged_in'))
 
@@ -97,18 +142,6 @@ def login():
 
 @app.route('/logout/')
 def logout():
-    
-    db_user = User.query.filter_by(id=session['user_id'])[0]
-
-    if db_user.photo_exists:
-        filename = db_user.photo_name
-        profile_url = os.path.join('static/img', filename)
-        full_profile_url = 'app/' + profile_url
-        try:
-            os.remove(full_profile_url)
-        except OSError:
-            flash("Profile was deleted for some reason")
-
     session['logged_in'] = False
     session.clear()
     flash("You've been logged out")
@@ -201,6 +234,7 @@ class ProjectForm(Form):
     description = TextAreaField('Project Description', [validators.Length(min=10, max=400)])
     progress = SelectField('Progress', choices=[("Plan", "Plan"), ("Started", "Started"),
      ("Ongoing", "Ongoing"), ("Completed", "Completed")])
+    image = FileField('Project Image')
 
 
 class LoginForm(Form):
@@ -211,6 +245,9 @@ def auth_user(user_id):
     session['user_id'] = user_id
     session['logged_in'] = True
 
+def allowed_file(filename):
+    return '.' in filename and \
+           (filename.rsplit('.', 1)[1]).lower() in ALLOWED_EXTENSIONS
 
 
 

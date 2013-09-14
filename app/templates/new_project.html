@@ -3,13 +3,14 @@
 {% block content %}
 
 {% from "_formhelpers.html" import render_field %}
-<form method=post action="/new/project">
+<form method=post action="/new/project" enctype="multipart/form-data">
   <dl>
     {{ render_field(form.name) }}
     {{ render_field(form.about) }}
     {{ render_field(form.help) }}
     {{ render_field(form.description) }}
     {{ render_field(form.progress) }}
+    {{ render_field(form.image) }}
   </dl>
   <p><input type=submit value=Register>
 </form>
