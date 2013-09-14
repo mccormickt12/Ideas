@@ -13,9 +13,6 @@ class User(db.Model):
     email = db.Column(db.String(120), unique = True)
     password = db.Column(db.String(64))
     year = db.Column(db.String(64))
-    photo_exists = db.Column(db.SmallInteger, default = NO)
-    photo_file = db.Column(db.LargeBinary(1000000))
-    photo_name = db.Column(db.String(64))
     progress = db.Column(db.String(64))
     activated = db.Column(db.SmallInteger, default = NO)
     projects = db.relationship('Project', backref = 'author', lazy = 'dynamic')
@@ -69,6 +66,9 @@ class Project(db.Model):
     description = db.Column(db.String(400))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     members = db.Column(db.String(400))
+    photo_exists = db.Column(db.SmallInteger, default = NO)
+    photo_file = db.Column(db.LargeBinary(1000000))
+    photo_name = db.Column(db.String(64))
 
 
     def __repr__(self):
