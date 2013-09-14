@@ -1,38 +1,14 @@
 {% extends "base.html" %}
 
+{% block heading %}<h1>Ideas at Berkeley</h1>{% endblock %}
+
 {% block content %}
-<head>
-  <link href="http://fonts.googleapis.com/css?family=Abel|Open+Sans:400,600" rel="stylesheet" />
-</head>
+
   <div class="container">
-  	<div class="row">
-  		<div class="col-lg-6 col-lg-offset-3 panel">
-  			<h1 class="margin-base-vertical">Ideas at Berkeley</h1>
-
-          <p style="text-align:center; font-weight:bold">
-            We provide the only mobile platform for creating, sending, and taking surveys.
-          </p>
-                
-
-          <form class="margin-base-vertical">
-              <p class="input-group">
-                  <span class="input-group-addon"><span class=".glyphicon .glyphicon-collapse-down"></span></span>
-                  <input type="text" class="form-control input-large" name="email" placeholder="yourname@gmail.com" />
-              </p>
-              <p class="help-block text-center"><small>Subscribe now for early beta access</small></p>
-              <p class="text-center">
-                  <button type="submit" class="btn btn-success btn-xlarge">Subscribe</button>
-              </p>
-              </span>
-          </form>
-
-    		</div>
-    	</div>
-    </div>
-
-
-
- 
-
-
+    <form>
+      <input type="text" class="form-control input-large" name="email" placeholder="yourname@gmail.com" />
+      <button type="submit" class="btn btn-success btn-xlarge">Subscribe</button>
+    </form>
+    <p class="help-block text-center"><small>Subscribe now for early beta access</small></p>
+  </div>
 {% endblock %}

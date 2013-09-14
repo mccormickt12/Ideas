@@ -14,7 +14,7 @@ class RegexConverter(BaseConverter):
 
 
 app.url_map.converters['regex'] = RegexConverter
-
+MAX_UPLOAD_SIZE = 1024 * 1024
 
 @app.route('/')
 def index():
@@ -65,6 +65,7 @@ def start():
             flash("Project cannot have spaces, try underscores or dashes instead!")
             return render_template('new_project.html', active="project", form=form, logged_in=session.get('logged_in')) 
         project = Project(name=form.name.data,about=form.about.data,help=form.help.data, description=form.description.data, progress=form.progress.data, user_id=session.get('user_id'))
+
         db.session.add(project)
         db.session.commit()
         return redirect(url_for('discover'))
@@ -96,6 +97,18 @@ def login():
 
 @app.route('/logout/')
 def logout():
+    
+    db_user = User.query.filter_by(id=session['user_id'])[0]
+
+    if db_user.photo_exists:
+        filename = db_user.photo_name
+        profile_url = os.path.join('static/img', filename)
+        full_profile_url = 'app/' + profile_url
+        try:
+            os.remove(full_profile_url)
+        except OSError:
+            flash("Profile was deleted for some reason")
+
     session['logged_in'] = False
     session.clear()
     flash("You've been logged out")
