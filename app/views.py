@@ -204,10 +204,16 @@ def proj_page(uname, proj):
         if project.first():
             project = project[0]
             if request.method == 'POST':
-                if project.addMember(session.get('user_id')):
-                    flash("You have now joined this project")
-                else: 
-                    flash("Already joined this project")
+                if request.form.get('join'):
+                    if project.addMember(session.get('user_id')):
+                        flash("You have now joined this project")
+                    else: 
+                        flash("Already joined this project")
+                elif request.form.get('remove'):
+                    db.session.delete(project)
+                    db.session.commit()
+                    flash("Project successfully deleted")
+                    return redirect(url_for('discover'))
             return render_template('project.html', user = user, project = project, logged_in=session.get('logged_in'),
              me=session.get('user_id'), members=project.getMembers())
     return render_template('error.html')
