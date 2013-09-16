@@ -221,7 +221,6 @@ def proj_page(uname, proj):
 
 @app.route('/<regex("[A-Za-z0-9-_.]{4,20}"):uname>/<regex("[ A-Za-z0-9-_.%]{4,20}"):proj>/edit/', methods=['GET', 'POST'])
 def edit_proj(uname, proj):
-    
     user = db.session.query(User).filter_by(user_name = uname)
     if user.first():
         user = user[0]
@@ -230,14 +229,20 @@ def edit_proj(uname, proj):
             project = project[0]
             if session.get('logged_in') and user.id == session.get('user_id'):
                 form = ProjectForm(request.form)
-                if request.method == 'POST' and form.validate():
-                    project.name = form.name.data
-                    project.about = form.about.data
-                    project.help = form.help.data
-                    project.description = form.description.data
-                    project.progress = form.description.data
-                    db.session.commit()
-                    return redirect(url_for('proj_page', uname=uname, proj=proj, logged_in=session.get('logged_in')))
+                if request.method == 'POST':
+                    if request.form.get('remove'):
+                        db.session.delete(project)
+                        db.session.commit()
+                        flash("Project successfully deleted")
+                        return redirect(url_for('user_page', uname=uname))
+                    elif form.validate():
+                        project.name = form.name.data
+                        project.about = form.about.data
+                        project.help = form.help.data
+                        project.description = form.description.data
+                        project.progress = form.description.data
+                        db.session.commit()
+                        return redirect(url_for('proj_page', uname=uname, proj=proj, logged_in=session.get('logged_in')))
                 else:
                     form.name.data = project.name
                     form.about.data = project.about

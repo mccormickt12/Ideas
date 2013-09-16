@@ -53,7 +53,7 @@ class User(db.Model):
             projects = []
             for p in projList:
                 proj = Project.query.filter_by(id=p)
-                if proj:
+                if proj.first():
                     projects.append(proj[0])
             return projects
         else:
@@ -97,11 +97,14 @@ class Project(db.Model):
             memList = self.members.split()
             memList = [int(x) for x in memList]
             members = []
+            print memList
             for m in memList:
                 user = User.query.filter_by(id=m)
-                if user:
+                if user.first():
                     members.append(user[0])
             return members
         else:
             return []
+
+
 
