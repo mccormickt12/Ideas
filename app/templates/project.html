@@ -15,7 +15,7 @@ Project title : {{ project.name }}
 {% endif %}
 {% if logged_in and not user.id == me %}
 	<form method=post action="">
-		<p><input name='join' type=submit value=Join>
+		<p><input name='join' type=submit value=Follow>
 	</form>
 {% endif %}
 <br>
@@ -29,10 +29,7 @@ Progress : {{ project.progress }}
 <br>
 
 <hr>
-List of Members
-{% for member in members %}
-	<br>
-	{{ member.user_name }}
-{% endfor %}
+Followers:
+{{ num_followers }}
 
 {% endblock %}

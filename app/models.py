@@ -16,7 +16,9 @@ class User(db.Model):
     progress = db.Column(db.String(64))
     activated = db.Column(db.SmallInteger, default = NO)
     projects = db.relationship('Project', backref = 'author', lazy = 'dynamic')
-    member_of = db.Column(db.String(500))
+    requests = db.relationship('Request', backref = 'owner', lazy = 'dynamic')
+    following = db.Column(db.String(500))
+    member_of = db.Column(db.String(400))
     
     @property
     def short_url(self):
@@ -37,18 +39,18 @@ class User(db.Model):
     def __repr__(self):
         return '<User %r>' % (self.name)
 
-    def addMemberOf(self, pid):
-        if self.member_of:
-            memList = self.member_of.split()
+    def follow(self, pid):
+        if self.following:
+            memList = self.following.split()
             memList.append(str(pid))
-            self.member_of = ' '.join(memList)
+            self.following = ' '.join(memList)
         else:
-            self.member_of = str(pid)
+            self.following = str(pid)
         db.session.commit()
 
-    def getMemberOf(self):
-        if self.member_of:
-            projList = self.member_of.split()
+    def getFollowing(self):
+        if self.following:
+            projList = self.following.split()
             projList = [int(x) for x in projList]
             projects = []
             for p in projList:
@@ -68,6 +70,7 @@ class Project(db.Model):
     description = db.Column(db.String(400))
     progress = db.Column(db.String(15))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    following = db.Column(db.String(400))
     members = db.Column(db.String(400))
     photo_exists = db.Column(db.SmallInteger, default = NO)
     photo_file = db.Column(db.LargeBinary(1000000))
@@ -77,34 +80,38 @@ class Project(db.Model):
     def __repr__(self):
         return '<Project %r>' % (self.name)
 
-    def addMember(self, uid):
-        if self.members:
-            memList = self.members.split()
+    def addFollower(self, uid):
+        if self.following:
+            memList = self.following.split()
             if str(uid) in memList:
                 return False
             memList.append(str(uid))
-            self.members = ' '.join(memList)
+            self.following = ' '.join(memList)
         else:
-            self.members = str(uid)
+            self.following = str(uid)
         db.session.commit()
         user = User.query.filter_by(id=uid)
         user = user[0]
-        user.addMemberOf(self.id)
+        user.follow(self.id)
         return True
 
-    def getMembers(self):
-        if self.members:
-            memList = self.members.split()
+    def getFollowers(self):
+        if self.following:
+            memList = self.following.split()
             memList = [int(x) for x in memList]
-            members = []
+            following = []
             print memList
             for m in memList:
                 user = User.query.filter_by(id=m)
                 if user.first():
-                    members.append(user[0])
-            return members
+                    following.append(user[0])
+            return following
         else:
             return []
 
 
-
+class Request(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    proj_id = db.Column(db.Integer)
+    requester_id = db.Column(db.Integer)
