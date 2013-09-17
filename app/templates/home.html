@@ -22,7 +22,15 @@ Owner of Projects
 {% endfor %}
 
 <hr>
-List of Projects
+
+{% for request in user.requests %}
+  {{ request.username }}
+  {{ request.skills }}
+  {{ request.reason }}
+{% endfor %}
+
+<hr>
+You are watching these projects
 <br>
 {% for project in projects %}
  	Project title : <a href="{{ project.name }}"> {{ project.name }} </a>

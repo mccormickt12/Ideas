@@ -115,3 +115,6 @@ class Request(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     proj_id = db.Column(db.Integer)
     requester_id = db.Column(db.Integer)
+    username = db.Column(db.String(64))
+    skills = db.Column(db.String(400))
+    reason = db.Column(db.String(400))

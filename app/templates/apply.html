@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+Apply here!!!!
+
+{% from "_formhelpers.html" import render_field %}
+<form method=post action="">
+  <dl>
+    {{ render_field(form.username) }}
+    {{ render_field(form.skills) }}
+    {{ render_field(form.why) }}
+  </dl>
+  <p><input type=submit value=Apply>
+</form>
+
+
+
+{% endblock %}

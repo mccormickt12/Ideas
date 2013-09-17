@@ -255,6 +255,40 @@ def edit_proj(uname, proj):
     return render_template('error.html')
 
 
+@app.route('/<regex("[A-Za-z0-9-_.]{4,20}"):uname>/<regex("[ A-Za-z0-9-_.%]{4,20}"):proj>/apply/', methods=['GET', 'POST'])
+def apply(uname, proj):
+    if session.get('logged_in'):
+        form = ApplyForm()
+        me = User.query.filter_by(id=session.get('user_id'))
+        user = User.query.filter_by(user_name = uname)
+        if me.first() and user.first():
+            me = me[0]
+            user = user[0]
+            project = Project.query.filter_by(name = proj, user_id = user.id)
+            if project.first():
+                project = project[0]
+            else:
+                return redirect(url_for('proj_page', uname=uname, proj=proj))
+        else:
+            return redirect(url_for('proj_page', uname=uname, proj=proj))
+        if request.method == 'POST' and form.validate():
+            flash('form validated')
+            req = Request(requestor_id=me.id, user_id=user.id, proj_id=project.id, username=user.user_name,
+            skills = form.skills.data, reason = form.why.data)
+            db.session.add(req)
+            db.session.commit()
+            flash("Request to join project sucecessful")
+            return redirect(url_for('proj_page', proj=proj, uname=uname))
+        elif user.id == me.id:
+            flash("Cannot apply to your own project")
+            return redirect(url_for('proj_page', proj=proj, uname=uname))
+        else:
+            form.username.data = me.user_name
+        return render_template('apply.html', form=form, logged_in=session.get('logged_in'), 
+            user=user, me=me)
+    else:
+        return redirect(url_for('login'))
+
 
 @app.route('/<regex(".+"):url>')
 def error():
@@ -288,8 +322,9 @@ class ProjectForm(Form):
 
 
 class ApplyForm(Form):
-    skills = TextAreaField("What skills do you offer? ", [validators.Length(min=2, max=25)])
-    why = TextAreaField("Why do you want to help? ", [validators.Length(min=2, max=25)])
+    username = TextField('Username', [validators.Length(min=2, max=25)])
+    skills = TextAreaField("What skills do you offer? ", [validators.Length(min=2, max=400)])
+    why = TextAreaField("Why do you want to help? ", [validators.Length(min=2, max=400)])
 
 class LoginForm(Form):
     email = TextField('Email', [validators.Required()])
