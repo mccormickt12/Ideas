@@ -1,14 +1,16 @@
 {% extends "base.html" %}
-
-{% block heading %}<h1>Ideas at Berkeley</h1>{% endblock %}
-
 {% block content %}
+<div class="content gray-background">
+  
+  <div class="logo"></div>
+  <header>
+    <h1 class="teal">Ideas at Berkeley</h1>
+  </header>
 
-  <div class="container">
-    <form>
+    <form class="signup">
+      <p class="help-block text-center"><small>Subscribe now for early beta access</small></p>
       <input type="text" class="form-control input-large" name="email" placeholder="yourname@gmail.com" />
-      <button type="submit" class="btn btn-success btn-xlarge">Subscribe</button>
+      <button type="submit" class="submit">Subscribe</button>
     </form>
-    <p class="help-block text-center"><small>Subscribe now for early beta access</small></p>
-  </div>
+</div>
 {% endblock %}

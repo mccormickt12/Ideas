@@ -29,16 +29,9 @@
     </nav>
     {% endif %}
     
-    <div class="content">
-      <header>
-        {% block heading %}{% endblock %}
-      </header>
-
-    	{% block content %}
-        <!-- Put content of the page here -->
-      {% endblock %}
-    </div>
-
+  	{% block content %}
+      <!-- Put content of the page here -->
+    {% endblock %}
 
     <!-- Scripts  -->
     <script src="{{ url_for('static', filename='js/jquery.js') }}"> </script>

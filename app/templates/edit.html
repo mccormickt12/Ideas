@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 
-{% block content %}
 
+{% block content %}
+<div class="content">
 {% from "_formhelpers.html" import render_field %}
 <form method=post action="">
   <dl>
@@ -19,5 +20,5 @@ Or just delete your project:
 	<form method=post action="">
 		<p><input name='remove' type=submit value=Delete>
 	</form>
-
+</div>
 {% endblock %}
