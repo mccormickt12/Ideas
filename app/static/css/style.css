@@ -111,12 +111,18 @@ li {
     outline: none; }
 
 .search {
-  height: 25px; }
+  height: 40px; }
   .search button {
-    height: 100%;
-    width: 100px;
-    padding: 0;
-    margin: 0; }
+    padding: 7px 20px;
+    font: 400 13px "Open Sans", "Helvetica", "Arial", sans-serif;
+    background: #d1ad36;
+    border: none;
+    color: #ffdd79;
+    top: -8px;
+    position: relative; }
+    .search button:hover {
+      cursor: pointer;
+      box-shadow: 1px 1px 1px 0px #d1ad36; }
 
 .logo {
   width: 309px;
@@ -126,9 +132,9 @@ li {
   margin-bottom: 15px; }
 
 .teal-background {
-  width: 100%;
-  height: 100%;
   background: #68cbdf; }
+  .teal-background header h1 {
+    color: #447f8c; }
 
 h1.teal {
   color: #68cbdf; }
@@ -164,3 +170,22 @@ h1.teal {
     text-align: center;
     font-size: 20px;
     color: #68cbdf; }
+
+.new-project {
+  color: #447f8c;
+  font: 700 17px "Open Sans", "Helvetica", "Arial", sans-serif; }
+  .new-project input {
+    -webkit-appearance: none;
+    border: 1px solid #eee;
+    padding: 5px 15px;
+    font: 400 12px "Open Sans", "Helvetica", "Arial", sans-serif; }
+  .new-project .submit {
+    margin-top: 5px;
+    padding: 7px 20px;
+    font: 400 13px "Open Sans", "Helvetica", "Arial", sans-serif;
+    background: #447f8c;
+    border: none;
+    color: #68cbdf; }
+    .new-project .submit:hover {
+      cursor: pointer;
+      box-shadow: 1px 1px 1px 0px #68cbdf; }
